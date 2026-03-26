@@ -214,3 +214,17 @@ __marimo__/
 *.gz
 *.zip
 *.rar
+*.jpg
+*.png
+*.doc
+*.docx
+
+## Datasets
+**/TestSet
+**/TrainSet
+**.pdf
+**.part**
+**.rar
+
+# models
+**.pth
