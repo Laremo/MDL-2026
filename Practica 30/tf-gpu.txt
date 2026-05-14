@@ -1,0 +1,36 @@
+0. Make sure nvidia driver is working in Windows
+nvidia-smi
+
+1. Fresh Ubuntu 24.04 in WSL2
+wsl -- install Ubuntu
+
+Make sure nvidia driver is working in WSL
+nvidai-smi
+
+2. Install python3-venv and python3-pip
+sudo apt update
+sudo apt install python3-venv
+
+3. Create a virtual environment in your Linux home directory (~), not in /mnt/c/
+I use tf-gpu as the virtual environment name, you can use whatever you want
+cd ~
+python3 -m venv tf-gpu
+
+4. Activate the virtual environment
+cd tf-gpu
+source bin/activate
+
+5. Install tensorflow and CUDA
+pip install -- upgrade pip
+pip install tensorflow[and-cuda]
+
+6. Make symbolic links to libraries in correct location
+cd $(dirname $(python -c 'print(_import_("tensorflow") ._ file_)'))
+In -svf .. /nvidia/*/lib/ *. so* .
+cd -
+In -sf $VIRTUAL_ENV/lib/python3.12/site-packages/nvidia/cuda_nvcc/bin/ptxas $VIRTUAL_ENV/bin/ptxas
+
+7. Add to LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$VIRTUAL_ENV/1ib/python3.12/site-packages/tensorflow
+
+Add LD_LIBRARY_PATH to activate script to make it permanent whenever you use virtual environment
