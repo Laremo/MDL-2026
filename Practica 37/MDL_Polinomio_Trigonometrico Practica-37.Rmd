@@ -1,0 +1,226 @@
+# UNIVERSIDAD AUTONOMA DE AGUASCALIENTES
+# Departamento: Ciencias de la Computación
+# Carrera: Ingeniería en Computación Inteligente
+
+## Curso: Machine y Deep Learning
+## Maestro: Dr. Francisco Javier Luna Rosas
+## Alumno: César Eduardo Elias del Hoyo
+
+### Semestre: Enero-Junio del 2026
+
+# Practica No. 37. Polinomio Trigonometrico
+
+# 1.- TEST DE NORMALIDAD
+### Lo primero que se le debe hacer a una serie de normalidad de los residuos (difencias), que quiere decir esto, que los datos de los residuos (diferencias) siguen a una curva normal 
+
+---
+
+### Paso 1: Cargamos los datos del mercado de valores
+```{r}
+setwd("C:/Users/cesar/Desktop/UAA/10S/OPTATIVA II - Machine y Deep Learning/PRACTICAS DE CLASE - JUPYTER PYTHON")
+stock.data <- read.csv("stockdata.csv", header=T, dec=",", sep=";")
+head(stock.data)
+dim(stock.data)
+summary(stock.data)
+```
+
+### Paso 2: Graficar la serie de tiempo para verificar posibles atipisidades
+```{r}
+# Gráfica series de tiempo para el volumen
+plot(stock.data[,5], type="l")
+# Gráfica series ed tiempo para el precio de cierre
+plot(stock.data$close, type="l")
+```
+
+### Paso 3: Mostrar posibles atipisidades de los datos
+```{r}
+plot(diff(stock.data$low), type="l") # Muestra posibles atipisidades
+```
+
+### Paso 4: En ocasiones se aplica un logaritmo para suavizar la serie
+```{r}
+plot(diff(log(stock.data$low)), type="l")
+```
+
+### Paso 5: Probar el operador diff, para realizar test de normalidad de los residuos (diferencias)
+```{r}
+# Operador diff
+diff(1:10, 1)
+diff(c(9, 2, 3, 1, 6, 7), 1)
+```
+
+### Paso 6: Generar el Histograma
+```{r}
+hist(diff(stock.data$low), prob=T, ylim=c(0,0.6), xlim=c(-5,5), col="red")
+lines(density(diff(stock.data$low)), lwd=2)
+
+mu <- mean(diff(stock.data$low))
+mu
+sigma <- sd(diff(stock.data$low))
+sigma
+x <- seq(-4, 4, length=100)
+x
+y <- dnorm(x, mu, sigma)
+lines(x, y, lwd=2, col="blue")
+```
+
+# 2.- MEDIAS MÓVILES
+### Paso 7: Aplicar el filtro de medias moviles, para Suavizar la serie
+```{r}
+# Suavizado lineal (promedio moviles)
+setwd("C:/Users/cesar/Desktop/UAA/10S/OPTATIVA II - Machine y Deep Learning/PRACTICAS DE CLASE - JUPYTER PYTHON")
+plot(stock.data[,5], type="l")
+st.1 <- filter(stock.data[,5], filter=rep(1/5, 5))
+st.2 <- filter(stock.data[,5], filter=rep(1/25, 25))
+st.3 <- filter(stock.data[,5], filter=rep(1/81, 81))
+lines(st.1, col="red")
+lines(st.2, col="blue")
+lines(st.3, col="purple")
+```
+
+# 3.- COMPONENTES DE LA SERIE DE TIEMPO (TENDENCIA, CICLO, ESTACIONALIDAD Y MOVIMIENTO ALEATORIO)
+
+## Series de Tiempo. Análisis preliminar de una serie de tiempo. El tercer análisis que se debe de hacer es observar sus componentes (Tendencia, Ciclo, Estacionalidad Y Movimiento Aleatorio)
+
+### Ejemplo 1. Tomamos la serie de tiempo de Ventas de Cerveza en Australia. ¿Cuáles han sido las ventas de cerveza de Jan. 1956 a Aug. 1995?
+```{r}
+# Series de tiempo 
+setwd("C:/Users/cesar/Desktop/UAA/10S/OPTATIVA II - Machine y Deep Learning/PRACTICAS DE CLASE - JUPYTER PYTHON")
+beer <- read.csv("beer.csv", header=T, dec=",", sep=";")
+head(beer)
+dim(beer)
+beer <- ts(beer[,1], start=1956, freq=12)
+head(beer)
+beer
+plot(beer)
+# stl logra la descomposicion
+s <- stl(beer, s.window="periodic")
+# El valor de la serie de tiempo es igual = seasonal + trend + reminder
+# En este caso Jan = 32.
+s$time.series
+s$deg
+plot(stl(beer, s.window="periodic"))
+```
+
+### Ejemplo 2. Acciones de CISCO REFERENTES AL DJ
+## NOTA. Esta serie de tiempo no funciona por ser una serie de tiempo muy corta
+```{r}
+#setwd("C:/Users/cesar/Desktop/UAA/10S/OPTATIVA II - Machine y Deep Learning/PRACTICAS DE CLASE - JUPYTER PYTHON")
+#DJData <- read.csv("DJTable.csv", header=T, dec=".", sep=";", row.names=1)
+#dim(DJData)
+#head(DJData)
+#csco <- ts(rev(DJData$csco), start = c(2010,2), frecuency = 365)
+#csco
+#plot(csco, type = 'o')
+#s <- stl(csco, s.window="periodic")
+```
+
+
+# 4.- TENDENCIA DE LA SERIE DE TIEMPO
+
+```{r}
+# Ejemplos con los datos de cancer de prostata
+#setwd("C:/Users/cesar/Desktop/UAA/10S/OPTATIVA II - Machine y Deep Learning/PRACTICAS DE CLASE - JUPYTER PYTHON")
+#PDatos <- read.csv("prostata.csv", header=TRUE, dec=",", sep=";")
+#head(PDatos)
+# La variable que mejor se correlaciona con lpsa es lcavol ya que es la que tiene la mas alta correlación
+
+#cor(PDatos)
+# predecimos lpsa en función lcalvol
+
+#modelo <- lm(lpsa~lcavol, data = PDatos)
+#modelo
+#plot(PDatos$lcaol, PDatos$lpsa, col="red")
+#abline(modelo, col="blue")
+
+# Un ejemplo para ilustrar la Necesidadde usar Regresión
+
+setwd("C:/Users/cesar/Desktop/UAA/10S/OPTATIVA II - Machine y Deep Learning/PRACTICAS DE CLASE - JUPYTER PYTHON")
+beer <- read.csv("beer.csv", header=T, dec=",", sep=";")
+dim(beer)
+
+beer <- beer[,1]
+length(beer)
+lbeer <- log(beer)
+t <- seq(1956, 1955.2, length=length(beer))
+t
+plot(t, lbeer, type="o")
+
+# Hacemos una regresión para mostrar la tendencia que sigue de las ventas de cerveza en Australia
+# (lñinea roja) y observamos en la figura que las ventas de cerveza tienen una tendencia de crecimiento
+
+# aunque al final decrecce un poco
+plot(t, lbeer, type="o")
+## Agregamos una Regresión al Modelo
+t2 <- t^2
+lines(t, lm(lbeer~t+t2)$fit, col=2, lwd=2)
+```
+
+# 5.- SERIE DE FOURIER
+
+```{r}
+# Agregamos una Serie de Fourier al modelo, para descubrir la ciclicidad en el cual el periodo se repite
+plot(t, lbeer, type="o")
+lines(t,lm(lbeer~t+t2)$fit, col=2, lwd=2)
+
+# Agregamos una Serie de Fourier al Modelo
+sin.t <- sin(2*pi*t)
+cos.t <- cos(2*pi*t)
+lines(t, lm(lbeer~t+t2+sin.t+cos.t)$fit, col=4, lwd=2)
+```
+
+# 6.- PERIDIOGRAMA
+### Aplicamos el peridiograma y ponemos logaritmo=no, para que no suavice la serie. El peridiograma nos permite descubrir los periodos mas importantes, en este caso los tres periodos mas importantes que obtuvimos mayor numero de ventas de cerveza
+```{r}
+res <- spec.pgram(lbeer, log="no")
+res$freq
+### res me da la frecuenci y el espectro, que es lo que se grafica en el grafico del peridiograma
+### El peridiograma me grafica la frecuencia eje x y el espectro eje y
+
+### Tengo que descubrir en cual alcanzo los tres picos maximos
+### Ordeno el especto relativo a la frecuencia en orden decreciente
+order(res$spec, res$freq, decreasing=TRUE)
+
+# Los tres periodos mas importantes, estan en la posicion 40, 2 y 120
+# posteriormente descubrimo sus valores
+max1 <- res$freq[40]
+max1
+
+max2 <- res$freq[2]
+max2
+
+max3 <- res$freq[120]
+max3
+
+# El primero "pico" ocurre en: 0.0041
+abline(v=max1, lty="dotted", col="red")
+# Este pico implica que el periodo es 
+periodo1 <- 1/max1
+# Donde 1 es la frecuencia de la serie
+periodo1
+
+# Esto nos indica que cada 12 meses tengo un buen periodo de ventas
+# Esto pudiera ser por que tenemos una fecha de celabracion importante cada 12 meses
+
+# El segund "pico" ocurre en> 0.08 y nosindica que cada 240 meses tentemos nnuestra mayor capaciadd de ventas
+abline(v=max2, lty="dotted", col="blue")
+# Este pico implica que el periodo es 
+periodo2 <- 1/max2
+periodo2
+
+# El tercer "pico" ocurre en> 0.25 , lo que nos indica que cada cuatro meses tengo un incremento constante de ventas
+abline(v=max3, lty="dotted", col="magenta")
+```
+
+# Conclusiones
+
+### En esta practica implementamos el test de normalidad y suavizado de las series de tiempo, que hacen referencia al mercado de valores de yahoo! finanzas
+
+# Referencias
+### [1] John Chambers (2008). Software for Data Analysis Programming with R. USA: Springer Verlag 2008.
+
+### [2] Jollife, I. T. (2002). Principal component analysis for special types of data (pp. 338-372). Springer New York.
+
+### [3] Reporte Técnico de PROMIDAT (2025). URL: https://promidat.com/ (Ultimo acceso mayo 2025)
+
+### [4] Yahoo Finanzas (2026). https://finance.yahoo.com/
